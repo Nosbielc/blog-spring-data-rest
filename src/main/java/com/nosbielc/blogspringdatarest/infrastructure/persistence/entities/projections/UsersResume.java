@@ -1,6 +1,6 @@
-package com.nosbielc.blogspringdatarest.persistence.entities.projections;
+package com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.projections;
 
-import com.nosbielc.blogspringdatarest.persistence.entities.User;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 

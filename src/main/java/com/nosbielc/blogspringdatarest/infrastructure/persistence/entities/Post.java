@@ -1,4 +1,4 @@
-package com.nosbielc.blogspringdatarest.persistence.entities;
+package com.nosbielc.blogspringdatarest.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
 import lombok.*;

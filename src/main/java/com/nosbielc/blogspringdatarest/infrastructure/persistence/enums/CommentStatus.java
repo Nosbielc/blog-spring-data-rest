@@ -1,4 +1,4 @@
-package com.nosbielc.blogspringdatarest.persistence.enums;
+package com.nosbielc.blogspringdatarest.infrastructure.persistence.enums;
 
 public enum CommentStatus {
     PENDING_APPROVAL(0, "Pending Approval"),

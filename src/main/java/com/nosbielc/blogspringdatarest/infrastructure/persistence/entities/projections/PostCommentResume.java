@@ -1,7 +1,7 @@
-package com.nosbielc.blogspringdatarest.persistence.entities.projections;
+package com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.projections;
 
-import com.nosbielc.blogspringdatarest.persistence.entities.PostComment;
-import com.nosbielc.blogspringdatarest.persistence.enums.CommentStatus;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.PostComment;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.enums.CommentStatus;
 import org.springframework.data.rest.core.config.Projection;
 
 @Projection(name = "postCommentResume", types = { PostComment.class })

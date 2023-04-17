@@ -1,9 +1,14 @@
-package com.nosbielc.blogspringdatarest.persistence.repositories;
+package com.nosbielc.blogspringdatarest;
 
-import com.nosbielc.blogspringdatarest.persistence.entities.Post;
-import com.nosbielc.blogspringdatarest.persistence.entities.PostComment;
-import com.nosbielc.blogspringdatarest.persistence.entities.User;
-import com.nosbielc.blogspringdatarest.persistence.enums.CommentStatus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.Post;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.PostComment;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.User;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.enums.CommentStatus;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.repositories.PostCommentRepository;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.repositories.PostRepository;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.repositories.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -25,6 +29,7 @@ import java.util.List;
 import java.util.Random;
 
 import static java.lang.String.format;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,7 +56,7 @@ class DataRestTest {
 
     private static final String URL_BASE_USER = "/api/v1/users";
     private static final String URL_BASE_POST = "/api/v1/posts";
-    private static final String URL_BASE_POST_COMMENT = "/api/v1/comments";
+    private static final String URL_BASE_POST_COMMENT = "/api/v1/postComments";
     @BeforeEach
     void setUp() {
 
@@ -120,7 +125,6 @@ class DataRestTest {
 //        postCommentRepository.findAll().forEach(System.out::println);
     }
 
-    @WithMockUser
     @ParameterizedTest
     @CsvSource({"1", "2"})
     void findUserById(Long id) throws Exception {
@@ -149,7 +153,6 @@ class DataRestTest {
         }
     }
 
-    @WithMockUser
     @ParameterizedTest
     @CsvSource({"1", "2"})
     void findUserByIdWithProjectionUserResume(Long id) throws Exception {
@@ -181,4 +184,117 @@ class DataRestTest {
             throw new Exception("Houve um erro na massa de testes.");
         }
     }
+
+    @ParameterizedTest
+    @CsvSource({"Etevaldo, Silva, e_silva@email.com, 1200","Josefina, Souza, j_souza@email.com, 12","Lulalá, Picanha, l_picanha@email.com, 62","Framingo, Cheirinho, f_cheirinho@email.com, 44"})
+    void createUser(String firstName, String lastName, String email, Integer age) throws Exception {
+
+        var user = User.builder()
+                .withFirstName(firstName)
+                .withLastName(lastName)
+                .withEmail(email)
+                .withAge(age)
+                .build();
+
+        var jsonUser = getJsonUser(user);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(URL_BASE_USER)
+                        .principal(mockPrincipal)
+                        .content(jsonUser)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.firstName").value(user.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(user.getLastName()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.age").value(user.getAge()))
+                .andExpect(jsonPath("$._links.self").exists())
+                .andExpect(jsonPath("$._links.user").exists())
+                .andExpect(jsonPath("$._links.comments").exists())
+                .andExpect(jsonPath("$._links.posts").exists());
+
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1","2"})
+    void updateUser(Long id) throws Exception {
+
+        var userOld = userRepository.findById(id);
+
+        if (userOld.isPresent()) {
+
+            var user = User.builder()
+                    .withFirstName(userOld.get().getFirstName().concat(" Changed"))
+                    .withLastName(userOld.get().getLastName().concat(" Changed"))
+                    .withEmail("changed_".concat(userOld.get().getEmail()))
+                    .withAge(userOld.get().getAge() + 1)
+                    .build();
+
+            var jsonUser = getJsonUser(user);
+
+            mockMvc.perform(MockMvcRequestBuilders.put(URL_BASE_USER.concat("/").concat(String.valueOf(id)))
+                            .principal(mockPrincipal)
+                            .content(jsonUser)
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andDo(MockMvcResultHandlers.print())
+                    .andExpect(status().is2xxSuccessful())
+                    .andExpect(jsonPath("$.firstName").value(user.getFirstName()))
+                    .andExpect(jsonPath("$.lastName").value(user.getLastName()))
+                    .andExpect(jsonPath("$.email").value(user.getEmail()))
+                    .andExpect(jsonPath("$.age").value(user.getAge()))
+                    .andExpect(jsonPath("$._links.self").exists())
+                    .andExpect(jsonPath("$._links.user").exists())
+                    .andExpect(jsonPath("$._links.comments").exists())
+                    .andExpect(jsonPath("$._links.posts").exists());
+        } else {
+            throw new Exception("Houve um erro na massa de testes.");
+        }
+
+    }
+
+    @ParameterizedTest
+    @CsvSource({"Marivaldo, Silva, m_silva@email.com, 112","Groselha, Souza, g_souza@email.com, 22","Boso, Crazy, b_crazy@email.com, 33","Curintian, bla, c_bla@email.com, 88"})
+    void deleteUser(String firstName, String lastName, String email, Integer age) throws Exception {
+
+        var user = User.builder()
+                .withFirstName(firstName)
+                .withLastName(lastName)
+                .withEmail(email)
+                .withAge(age)
+                .build();
+
+        user = userRepository.save(user);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(URL_BASE_USER.concat("/").concat(String.valueOf(user.getId())))
+                        .principal(mockPrincipal)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().is2xxSuccessful());
+
+    }
+
+    @ParameterizedTest
+    @CsvSource({"5", "10", "20", "30"})
+    void findCommentsWithSize(Integer size) throws Exception {
+
+            mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE_POST_COMMENT)
+                            .queryParam("size", String.valueOf(size))
+                            .principal(mockPrincipal)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andDo(MockMvcResultHandlers.print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$._embedded.postComments").isArray())
+                    .andExpect(jsonPath("$._embedded.postComments", hasSize(size)))
+                    .andExpect(jsonPath("$.page.size").value(size));
+
+    }
+
+    private String getJsonUser(User user) throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(user);
+    }
+
 }

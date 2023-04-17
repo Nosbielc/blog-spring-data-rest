@@ -1,6 +1,6 @@
-package com.nosbielc.blogspringdatarest.persistence.entities;
+package com.nosbielc.blogspringdatarest.infrastructure.persistence.entities;
 
-import com.nosbielc.blogspringdatarest.persistence.enums.CommentStatus;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.enums.CommentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

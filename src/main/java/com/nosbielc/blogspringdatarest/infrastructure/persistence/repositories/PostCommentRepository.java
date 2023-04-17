@@ -1,9 +1,9 @@
-package com.nosbielc.blogspringdatarest.persistence.repositories;
+package com.nosbielc.blogspringdatarest.infrastructure.persistence.repositories;
 
-import com.nosbielc.blogspringdatarest.persistence.entities.Post;
-import com.nosbielc.blogspringdatarest.persistence.entities.PostComment;
-import com.nosbielc.blogspringdatarest.persistence.entities.User;
-import com.nosbielc.blogspringdatarest.persistence.enums.CommentStatus;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.Post;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.PostComment;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.entities.User;
+import com.nosbielc.blogspringdatarest.infrastructure.persistence.enums.CommentStatus;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
