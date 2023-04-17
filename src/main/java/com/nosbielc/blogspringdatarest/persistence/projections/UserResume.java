@@ -4,7 +4,7 @@ import com.nosbielc.blogspringdatarest.persistence.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
-@Projection(name = "postCommentResume", types = { User.class })
+@Projection(name = "userResume", types = { User.class })
 public interface UserResume {
 
     Long getId();
