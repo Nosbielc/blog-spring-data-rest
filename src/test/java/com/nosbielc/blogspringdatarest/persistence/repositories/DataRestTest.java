@@ -138,7 +138,40 @@ class DataRestTest {
                     .andExpect(jsonPath("$.firstName").value(userTest.get().getFirstName()))
                     .andExpect(jsonPath("$.lastName").value(userTest.get().getLastName()))
                     .andExpect(jsonPath("$.email").value(userTest.get().getEmail()))
-                    .andExpect(jsonPath("$.age").exists())
+                    .andExpect(jsonPath("$.age").value(userTest.get().getAge()))
+                    .andExpect(jsonPath("$._links.self").exists())
+                    .andExpect(jsonPath("$._links.user").exists())
+                    .andExpect(jsonPath("$._links.comments").exists())
+                    .andExpect(jsonPath("$._links.posts").exists());
+
+        } else {
+            throw new Exception("Houve um erro na massa de testes.");
+        }
+    }
+
+    @WithMockUser
+    @ParameterizedTest
+    @CsvSource({"1", "2"})
+    void findUserByIdWithProjectionUserResume(Long id) throws Exception {
+
+        var userTest = userList.stream().filter(user -> user.getId().equals(id)).findFirst();
+
+        if (userTest.isPresent()) {
+
+            mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE_USER.concat("/").concat(String.valueOf(id)))
+                            .queryParam("projection", "usersResume")
+                            .principal(mockPrincipal)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andDo(MockMvcResultHandlers.print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.firstName").doesNotExist())
+                    .andExpect(jsonPath("$.lastName").doesNotExist())
+                    .andExpect(jsonPath("$.id").value(userTest.get().getId()))
+                    .andExpect(jsonPath("$.fullName")
+                            .value(userTest.get().getFirstName().concat(" ").concat(userTest.get().getLastName())))
+                    .andExpect(jsonPath("$.email").value(userTest.get().getEmail()))
+                    .andExpect(jsonPath("$.age").value(userTest.get().getAge()))
                     .andExpect(jsonPath("$._links.self").exists())
                     .andExpect(jsonPath("$._links.user").exists())
                     .andExpect(jsonPath("$._links.comments").exists())

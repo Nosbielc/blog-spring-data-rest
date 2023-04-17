@@ -1,4 +1,4 @@
-package com.nosbielc.blogspringdatarest.persistence.projections;
+package com.nosbielc.blogspringdatarest.persistence.entities.projections;
 
 import com.nosbielc.blogspringdatarest.persistence.entities.PostComment;
 import com.nosbielc.blogspringdatarest.persistence.enums.CommentStatus;

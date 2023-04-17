@@ -1,11 +1,11 @@
-package com.nosbielc.blogspringdatarest.persistence.projections;
+package com.nosbielc.blogspringdatarest.persistence.entities.projections;
 
 import com.nosbielc.blogspringdatarest.persistence.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
-@Projection(name = "userResume", types = { User.class })
-public interface UserResume {
+@Projection(name = "usersResume", types = { User.class })
+public interface UsersResume {
 
     Long getId();
 
